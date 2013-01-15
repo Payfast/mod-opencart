@@ -76,7 +76,7 @@ define( 'PF_MSG_PENDING',
     ' Transaction Notification when the payment status changes to'.
     ' "Completed", or "Failed"' );
     
-define( 'PF_DEBUG', true );
+define( 'PF_DEBUG', false );
 
 
 /**
