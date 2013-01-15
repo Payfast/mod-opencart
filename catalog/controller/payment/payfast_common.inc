@@ -76,7 +76,7 @@ define( 'PF_MSG_PENDING',
     ' Transaction Notification when the payment status changes to'.
     ' "Completed", or "Failed"' );
     
-define( 'PF_DEBUG', true );
+define( 'PF_DEBUG', false );
 
 
 /**
@@ -272,7 +272,7 @@ function pfValidIP( $sourceIP )
 {
     // Variable initialization
     $validHosts = array(
-        'www.payfast.local',
+        'www.payfast.co.za',
         'sandbox.payfast.co.za',
         'w1w.payfast.co.za',
         'w2w.payfast.co.za',
