@@ -28,8 +28,8 @@ class ControllerPaymentPayFast extends Controller {
     var $pfHost = '';  
    function __construct($registry){
         parent::__construct($registry);
-        //$this->pfHost = ($this->config->get('payfast_sandbox') ? 'sandbox' : 'www') . '.payfast.co.za';
-        $this->pfHost = 'www.payfast.local'; //local testing
+        $this->pfHost = ($this->config->get('payfast_sandbox') ? 'sandbox' : 'www') . '.payfast.co.za';
+        //$this->pfHost = 'www.payfast.local'; //local testing
     
    }
     
