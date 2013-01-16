@@ -26,6 +26,6 @@ General Public License.
 *                                                                            *
 *    Please see the URL below for all information concerning this module:    *
 *                                                                            *
-*                 http://www.payfast.co.za/help/opencart                   *
+*                 http://www.payfast.co.za/developers/opencart               *
 *                                                                            *
 ******************************************************************************
