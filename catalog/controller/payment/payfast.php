@@ -19,6 +19,7 @@
  * @author     Ron Darby
  * @copyright  2009-2012 PayFast (Pty) Ltd
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @version    1.1.0
  */
 
 include('payfast_common.inc');
@@ -29,7 +30,9 @@ class ControllerPaymentPayFast extends Controller {
    function __construct($registry){
         parent::__construct($registry);
         $this->pfHost = ($this->config->get('payfast_sandbox') ? 'sandbox' : 'www') . '.payfast.co.za';
-        //$this->pfHost = 'www.payfast.local'; //local testing
+        if($this->config->get['debug']){$debug = true;}else{$debug = false;}
+        define( 'PF_DEBUG', $debug );
+        
     
    }
     

@@ -19,6 +19,7 @@
  * @author     Ron Darby
  * @copyright  2009-2012 PayFast (Pty) Ltd
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @version    1.1.0
  */
 
 ?>
@@ -58,7 +59,15 @@
               <?php echo $text_no; ?>
              </td>
           </tr>
-          
+          <tr>
+            <td><?php echo $text_debug; ?></td>
+            <td>
+              <input type="radio" name="payfast_debug" value="1" <?php if ($payfast_debug) { ?> checked="checked" <?php }; ?> />
+              <?php echo $text_yes; ?>
+              <input type="radio" name="payfast_debug" value="0" <?php if (!$payfast_debug) { ?> checked="checked" <?php }; ?> />
+              <?php echo $text_no; ?>
+             </td>
+          </tr>
          
           <tr>
             <td><?php echo $entry_total; ?></td>

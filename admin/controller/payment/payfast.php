@@ -19,6 +19,7 @@
  * @author     Ron Darby
  * @copyright  2009-2012 PayFast (Pty) Ltd
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @version    1.1.0
  */
 
 class ControllerPaymentPayFast extends Controller {
@@ -60,6 +61,7 @@ class ControllerPaymentPayFast extends Controller {
 		$this->data['entry_sort_order'] = $this->language->get('entry_sort_order');
         $this->data['entry_merchant_id'] = $this->language->get('entry_merchant_id');
         $this->data['entry_merchant_key'] = $this->language->get('entry_merchant_key');
+        $this->data['text_debug'] = $this->language->get('text_debug');
         
 		$this->data['button_save'] = $this->language->get('button_save');
 		$this->data['button_cancel'] = $this->language->get('button_cancel');

@@ -27,7 +27,7 @@ $_['heading_title']					 = 'PayFast.co.za';
 $_['text_payment']					 = 'Payment';
 $_['text_success']					 = 'Success!';
 $_['text_payfast']				     = '<a href="https://www.payfast.co.za" title><img src="view/image/payment/payfast.png" alt="PayFast" title="PayFast" border="0" /></a>';
-
+$_['text_debug']                     = 'Debug'; 
 // Entry
 
 $_['entry_sandbox']					 = 'Sandbox Mode:';
