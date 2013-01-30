@@ -56,55 +56,57 @@ class ControllerPaymentPayFast extends Controller {
 		if ($order_info) {
 		    $secure = '';
             
-		    if(!$this->config->get('payfast_sandbox')){
-                $this->data['merchant_id'] = $this->config->get('payfast_merchant_id');
-                $secure .= 'merchant_id='.urlencode($this->config->get('payfast_merchant_id'));
-                $this->data['merchant_key'] = $this->config->get('payfast_merchant_key');
-                $secure .= '&merchant_key='.urlencode($this->config->get('payfast_merchant_key'));
+		    if(!$this->config->get('payfast_sandbox'))
+            {
+                $merchant_id = $this->config->get('payfast_merchant_id');               
+                $merchant_key = $this->config->get('payfast_merchant_key');
+                
             }else{
-                $this->data['merchant_id'] = '10000100';
-                $secure .= 'merchant_id='.urlencode('10000100');
-                $this->data['merchant_key'] = '46f0cd694581a';
-                $secure .= '&merchant_key='.urlencode('46f0cd694581a');
+                $merchant_id = '10000100';                
+                $merchant_key = '46f0cd694581a';
+               
             }
-            $return = $this->url->link('checkout/success');
-            $this->data['return_url'] = $return;
-            $secure .= '&return_url='.urlencode($return);
-            $cancel = $this->url->link('checkout/checkout');            
-			$this->data['cancel_url'] = $cancel;
-            $secure .= '&cancel_url='.urlencode($cancel);
-            $notify =  $this->url->link('payment/payfast/callback');
-			$this->data['notify_url'] = $notify;
-            $secure .= '&notify_url='.urlencode($notify);
-            
+            $return_url = $this->url->link('checkout/success');           
+            $cancel_url = $this->url->link('checkout/checkout');
+            $notify_url =  $this->url->link('payment/payfast/callback');            
             $name_first = html_entity_decode($order_info['payment_firstname'], ENT_QUOTES, 'UTF-8');
-            $this->data['name_first'] = $name_first;
-            $secure .= '&name_first='.urlencode($name_first);
             $name_last = html_entity_decode($order_info['payment_lastname'], ENT_QUOTES, 'UTF-8');
-			$this->data['name_last'] =	$name_last;
-            $secure .= '&name_last='.urlencode($name_last);
-			$this->data['email_address'] = $order_info['email'];
-            $secure .= '&email_address='.urlencode($order_info['email']);
-            
-            $order_id = $this->session->data['order_id'];
-			$this->data['m_payment_id'] = $order_id;
-            $secure .= '&m_payment_id='.urlencode($order_id);
+			$email_address = $order_info['email'];            
+            $m_payment_id = $this->session->data['order_id'];
             $amount = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false);
-			$this->data['amount'] = $amount;
-            $secure .= '&amount='.urlencode($amount);
-            $item_name = $this->config->get('config_name') . ' - #' . $this->session->data['order_id'];	
-            $this->data['item_name'] = $item_name;
-            $secure .= '&item_name='.urlencode($item_name);
+            $item_name = $this->config->get('config_name') . ' - #' . $this->session->data['order_id'];
             $item_description = $this->language->get('text_sale_description');
-			$this->data['item_description'] = $item_description;
-            $secure .= '&item_description='.urlencode($item_description);
-			$this->data['custom_str1'] = $order_id;
-			$secure .= '&custom_str1='.urlencode($order_id);
+			$custom_str1 = $order_id;  
             
-			$securityHash = md5($secure);
+            
+            $payArray = array(
+                'merchant_id'=>$merchant_id,
+                'merchant_key'=>$merchant_key,
+                'return_url'=>$return_url,
+                'cancel_url'=>$cancel_url,
+                'notify_url'=>$notify_url,
+                'name_first'=>$name_first,
+                'name_last'=>$name_last,
+                'email_address'=>$email_address,
+                'm_payment_id'=>$m_payment_id,
+                'amount'=>$amount,
+                'item_name'=>$item_name,
+                'item_description'=>$item_description,
+                'custom_str1'=>$custom_str1
+            );
+            $secureString = '';
+            foreach($payArray as $k=>$v)
+            {
+                $secureString .= $k.'='.urlencode($v).'&';
+                $this->data[$k] = $v;        
+            }
+            $secureString = substr( $secureString, 0, -1 );
+            
+			$securityHash = md5($secureString);
             $this->data['signature'] = $securityHash;
 		
-			if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/payfast.tpl')) {
+			if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/payfast.tpl')) 
+            {
 				$this->template = $this->config->get('config_template') . '/template/payment/payfast.tpl';
 			} else {
 				$this->template = 'default/template/payment/payfast.tpl';
@@ -121,7 +123,8 @@ class ControllerPaymentPayFast extends Controller {
        $pfDone = false;
        $pfData = array();	   
        $pfParamString = '';
-		if (isset($this->request->post['custom_str1'])) {
+		if (isset($this->request->post['custom_str1'])) 
+        {
 			$order_id = $this->request->post['custom_str1'];
 		} else {
 			$order_id = 0;
@@ -252,9 +255,10 @@ class ControllerPaymentPayFast extends Controller {
                     // If unknown status, do nothing (safest course of action)
     			break;
             }
-             if (!$order_info['order_status_id']) {
+             if (!$order_info['order_status_id']) 
+             {
 				$this->model_checkout_order->confirm($order_id, $order_status_id);
-			} else {
+			 } else {
 				$this->model_checkout_order->update($order_id, $order_status_id);
 			}
         }	
