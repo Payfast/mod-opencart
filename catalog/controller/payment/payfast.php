@@ -19,7 +19,7 @@
  * @author     Ron Darby
  * @copyright  2009-2012 PayFast (Pty) Ltd
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @version    1.1.0
+ * @version    1.1.1
  */
 
 include('payfast_common.inc');
@@ -30,9 +30,8 @@ class ControllerPaymentPayFast extends Controller {
    function __construct($registry){
         parent::__construct($registry);
         $this->pfHost = ($this->config->get('payfast_sandbox') ? 'sandbox' : 'www') . '.payfast.co.za';
-        if($this->config->get['debug']){$debug = true;}else{$debug = false;}
-        define( 'PF_DEBUG', $debug );
-        
+        if($this->config->get('debug')){$debug = true;}else{$debug = false;}
+        define( 'PF_DEBUG', $debug );        
     
    }
     
@@ -76,7 +75,7 @@ class ControllerPaymentPayFast extends Controller {
             $amount = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false);
             $item_name = $this->config->get('config_name') . ' - #' . $this->session->data['order_id'];
             $item_description = $this->language->get('text_sale_description');
-			$custom_str1 = $order_id;  
+			$custom_str1 = $this->session->data['order_id'];  
             
             
             $payArray = array(

@@ -26,7 +26,7 @@
 define( 'PF_SOFTWARE_NAME', 'Opencart' );
 define( 'PF_SOFTWARE_VER', "1.5.4" );
 define( 'PF_MODULE_NAME', 'PayFast-Opencart' );
-define( 'PF_MODULE_VER', '1.0.0' );
+define( 'PF_MODULE_VER', '1.1.1' );
 
 // Features
 // - PHP

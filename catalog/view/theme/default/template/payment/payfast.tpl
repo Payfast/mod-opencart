@@ -19,6 +19,7 @@
  * @author     Ron Darby
  * @copyright  2009-2012 PayFast (Pty) Ltd
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @version    1.1.1
  */
 
 ?>

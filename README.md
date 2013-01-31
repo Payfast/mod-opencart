@@ -2,7 +2,7 @@
 
 PayFast module for OpenCart
 
-PayFast OpenCart Module v1.00 for OpenCart v1.5.4
+PayFast OpenCart Module v1.0.1 for OpenCart v1.5.4
 -------------------------------------------------------
 Copyright (c) 2011 PayFast (Pty) Ltd
 
