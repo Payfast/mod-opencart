@@ -36,6 +36,8 @@ class ControllerPaymentPayFast extends Controller {
    }
     
 	protected function index() {
+
+        $config = new Config();
 	        
 	   //session_destroy();
 		$this->language->load('payment/payfast');
@@ -65,9 +67,9 @@ class ControllerPaymentPayFast extends Controller {
                 $merchant_key = '46f0cd694581a';
                
             }
-            $return_url = $this->url->link('checkout/success');           
-            $cancel_url = $this->url->link('checkout/checkout');
-            $notify_url =  $this->url->link('payment/payfast/callback');            
+            $return_url = $this->url->link('checkout/success','',$config->get('config_use_ssl')?'SSL':'NONSSL');           
+            $cancel_url = $this->url->link('checkout/checkout','',$config->get('config_use_ssl')?'SSL':'NONSSL');
+            $notify_url =  $this->url->link('payment/payfast/callback','',$config->get('config_use_ssl')?'SSL':'NONSSL');            
             $name_first = html_entity_decode($order_info['payment_firstname'], ENT_QUOTES, 'UTF-8');
             $name_last = html_entity_decode($order_info['payment_lastname'], ENT_QUOTES, 'UTF-8');
 			$email_address = $order_info['email'];            
