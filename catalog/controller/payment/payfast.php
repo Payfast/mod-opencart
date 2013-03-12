@@ -35,29 +35,29 @@ class ControllerPaymentPayFast extends Controller {
     
    }
     
-	protected function index() {
+    protected function index() {
 
         $config = new Config();
-	        
-	   //session_destroy();
-		$this->language->load('payment/payfast');
-		
-		$this->data['text_sandbox'] = $this->language->get('text_sandbox');		
-    	
-		$this->data['button_confirm'] = $this->language->get('button_confirm');
-
-		$this->data['sandbox'] = $this->config->get('payfast_sandbox');
-		
-        $this->data['action'] = 'https://'.$this->pfHost.'/eng/process';
-		
-		$this->load->model('checkout/order');
-
-		$order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
-
-		if ($order_info) {
-		    $secure = '';
             
-		    if(!$this->config->get('payfast_sandbox'))
+       //session_destroy();
+        $this->language->load('payment/payfast');
+        
+        $this->data['text_sandbox'] = $this->language->get('text_sandbox');     
+        
+        $this->data['button_confirm'] = $this->language->get('button_confirm');
+
+        $this->data['sandbox'] = $this->config->get('payfast_sandbox');
+        
+        $this->data['action'] = 'https://'.$this->pfHost.'/eng/process';
+        
+        $this->load->model('checkout/order');
+
+        $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+
+        if ($order_info) {
+            $secure = '';
+            
+            if(!$this->config->get('payfast_sandbox'))
             {
                 $merchant_id = $this->config->get('payfast_merchant_id');               
                 $merchant_key = $this->config->get('payfast_merchant_key');
@@ -67,17 +67,17 @@ class ControllerPaymentPayFast extends Controller {
                 $merchant_key = '46f0cd694581a';
                
             }
-            $return_url = $this->url->link('checkout/success','',$config->get('config_use_ssl')?'SSL':'NONSSL');           
-            $cancel_url = $this->url->link('checkout/checkout','',$config->get('config_use_ssl')?'SSL':'NONSSL');
-            $notify_url =  $this->url->link('payment/payfast/callback','',$config->get('config_use_ssl')?'SSL':'NONSSL');            
+            $return_url = defined(HTTPS_SERVER) ? HTTPS_SERVER."index.php?route=checkout/success" : HTTPS_SERVER."index.php?route=checkout/success";//$this->url->link('checkout/success','',$config->get('config_use_ssl')?'SSL':'NONSSL');           
+            $cancel_url = defined(HTTPS_SERVER) ? HTTPS_SERVER."index.php?route=checkout/checkout" : HTTPS_SERVER."index.php?route=checkout/checkout";// $this->url->link('checkout/checkout','',$config->get('config_use_ssl')?'SSL':'NONSSL');
+            $notify_url = defined(HTTPS_SERVER) ? HTTPS_SERVER."index.php?route=payment/payfast/callback" : HTTPS_SERVER."index.php?route=payment/payfast/callback";// $this->url->link('payment/payfast/callback','',$config->get('config_use_ssl')?'SSL':'NONSSL');            
             $name_first = html_entity_decode($order_info['payment_firstname'], ENT_QUOTES, 'UTF-8');
             $name_last = html_entity_decode($order_info['payment_lastname'], ENT_QUOTES, 'UTF-8');
-			$email_address = $order_info['email'];            
+            $email_address = $order_info['email'];            
             $m_payment_id = $this->session->data['order_id'];
             $amount = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false);
             $item_name = $this->config->get('config_name') . ' - #' . $this->session->data['order_id'];
             $item_description = $this->language->get('text_sale_description');
-			$custom_str1 = $this->session->data['order_id'];  
+            $custom_str1 = $this->session->data['order_id'];  
             
             
             $payArray = array(
@@ -103,34 +103,34 @@ class ControllerPaymentPayFast extends Controller {
             }
             $secureString = substr( $secureString, 0, -1 );
             
-			$securityHash = md5($secureString);
+            $securityHash = md5($secureString);
             $this->data['signature'] = $securityHash;
-		
-			if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/payfast.tpl')) 
+        
+            if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/payfast.tpl')) 
             {
-				$this->template = $this->config->get('config_template') . '/template/payment/payfast.tpl';
-			} else {
-				$this->template = 'default/template/payment/payfast.tpl';
-			}
-	
-			$this->render();
-		}
-	}
-	
-	public function callback() {
-	   
+                $this->template = $this->config->get('config_template') . '/template/payment/payfast.tpl';
+            } else {
+                $this->template = 'default/template/payment/payfast.tpl';
+            }
+    
+            $this->render();
+        }
+    }
+    
+    public function callback() {
+       
        $pfError = false;
        $pfErrMsg = '';
        $pfDone = false;
-       $pfData = array();	   
+       $pfData = array();      
        $pfParamString = '';
-		if (isset($this->request->post['custom_str1'])) 
+        if (isset($this->request->post['custom_str1'])) 
         {
-			$order_id = $this->request->post['custom_str1'];
-		} else {
-			$order_id = 0;
-		}		
-		
+            $order_id = $this->request->post['custom_str1'];
+        } else {
+            $order_id = 0;
+        }       
+        
         
          pflog( 'PayFast ITN call received' );
     
@@ -219,8 +219,8 @@ class ControllerPaymentPayFast extends Controller {
             }          
             
         }
-				
-	   //// Check status and update order
+                
+       //// Check status and update order
         if( !$pfError && !$pfDone )
         {
             pflog( 'Check status and update order' );
@@ -228,7 +228,7 @@ class ControllerPaymentPayFast extends Controller {
             
             $transaction_id = $pfData['pf_payment_id'];
     
-    		switch( $pfData['payment_status'] )
+            switch( $pfData['payment_status'] )
             {
                 case 'COMPLETE':
                     pflog( '- Complete' );
@@ -238,31 +238,31 @@ class ControllerPaymentPayFast extends Controller {
                     
                     break;
     
-    			case 'FAILED':
+                case 'FAILED':
                     pflog( '- Failed' );
     
                     // If payment fails, delete the purchase log
                     $order_status_id = $this->config->get('payfast_failed_status_id');
     
-        			break;
+                    break;
     
-    			case 'PENDING':
+                case 'PENDING':
                     pflog( '- Pending' );
     
                     // Need to wait for "Completed" before processing
-        			break;
+                    break;
     
-    			default:
+                default:
                     // If unknown status, do nothing (safest course of action)
-    			break;
+                break;
             }
              if (!$order_info['order_status_id']) 
              {
-				$this->model_checkout_order->confirm($order_id, $order_status_id);
-			 } else {
-				$this->model_checkout_order->update($order_id, $order_status_id);
-			}
-        }	
-	}
+                $this->model_checkout_order->confirm($order_id, $order_status_id);
+             } else {
+                $this->model_checkout_order->update($order_id, $order_status_id);
+            }
+        }   
+    }
 }
 ?>
