@@ -98,7 +98,7 @@ class ControllerPaymentPayFast extends Controller {
             $secureString = '';
             foreach($payArray as $k=>$v)
             {
-                $secureString .= $k.'='.urlencode($v).'&';
+                $secureString .= $k.'='.urlencode(trim($v)).'&';
                 $this->data[$k] = $v;        
             }
             $secureString = substr( $secureString, 0, -1 );
