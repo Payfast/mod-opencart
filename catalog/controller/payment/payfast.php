@@ -52,9 +52,13 @@ class ControllerPaymentPayFast extends Controller {
         
         $this->load->model('checkout/order');
 
-        $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+        $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);        
 
+        
         if ($order_info) {
+
+           
+            $order_info['currency_code'] = 'ZAR';
             $secure = '';
             
             if(!$this->config->get('payfast_sandbox'))
@@ -74,7 +78,7 @@ class ControllerPaymentPayFast extends Controller {
             $name_last = html_entity_decode($order_info['payment_lastname'], ENT_QUOTES, 'UTF-8');
             $email_address = $order_info['email'];            
             $m_payment_id = $this->session->data['order_id'];
-            $amount = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false);
+            $amount = $this->currency->format($order_info['total'], $order_info['currency_code'],'',false);
             $item_name = $this->config->get('config_name') . ' - #' . $this->session->data['order_id'];
             $item_description = $this->language->get('text_sale_description');
             $custom_str1 = $this->session->data['order_id'];  

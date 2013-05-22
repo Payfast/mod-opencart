@@ -37,10 +37,11 @@ class ModelPaymentPayFast extends Model {
 		} else {
 			$status = false;
 		}	
+        $this->load->model('localisation/currency');
 
-		$currencies = array(
-			'ZAR'
-		);
+        $supportedCurrencies = $this->model_localisation_currency->getCurrencies();
+
+		$currencies = array_keys($supportedCurrencies);
 		
 		if (!in_array(strtoupper($this->currency->getCode()), $currencies)) {
 			$status = false;
