@@ -91,7 +91,6 @@ define( 'PF_MSG_PENDING',
 function pflog( $msg = '', $close = false )
 {
     static $fh = 0;
-    global $module;
 
     // Only log if debugging is enabled
     if( PF_DEBUG )
@@ -151,8 +150,8 @@ function pfValidSignature( $pfData = null, &$pfParamString = null )
     // Dump the submitted variables and calculate security signature
     foreach( $pfData as $key => $val )
     {
-    	if( $key != 'signature' ){
-    		$pfParamString .= $key .'='. urlencode( $val ) .'&';
+        if( $key != 'signature' ){
+            $pfParamString .= $key .'='. urlencode( $val ) .'&';
             }
     }
 
@@ -217,11 +216,11 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '' )
         $headerDone = false;
          
         // Construct Header
-        $header = "POST /eng/query/validate HTTP/1.0\r\n";
-       	$header .= "Host: ". $pfHost ."\r\n";
-        $header .= "User-Agent: ". PF_USER_AGENT ."\r\n";
-        $header .= "Content-Type: application/x-www-form-urlencoded\r\n";
-        $header .= "Content-Length: " . strlen( $pfParamString ) . "\r\n\r\n";
+        $header = "POST /eng/query/validate HTTP/1.0\n";
+        $header .= "Host: ". $pfHost ."\n";
+        $header .= "User-Agent: ". PF_USER_AGENT ."\n";
+        $header .= "Content-Type: application/x-www-form-urlencoded\n";
+        $header .= "Content-Length: " . strlen( $pfParamString ) . "\n\n";
  
         // Connect to server
         $socket = fsockopen( 'ssl://'. $pfHost, 443, $errno, $errstr, PF_TIMEOUT );
@@ -235,7 +234,7 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '' )
             $line = fgets( $socket, 1024 );
  
             // Check if we are finished reading the header yet
-            if( strcmp( $line, "\r\n" ) == 0 )
+            if( strcmp( $line, "\n" ) == 0 )
             {
                 // read the header
                 $headerDone = true;
@@ -253,7 +252,7 @@ function pfValidData( $pfHost = 'www.payfast.co.za', $pfParamString = '' )
     pflog( "Response:\n". print_r( $response, true ) );
 
     // Interpret Response
-    $lines = explode( "\r\n", $response );
+    $lines = explode( "\n", $response );
     $verifyResult = trim( $lines[0] );
     
     if( strcasecmp( $verifyResult, 'VALID' ) == 0 )

@@ -213,10 +213,11 @@ class ControllerPaymentPayFast extends Controller {
         //// Check data against internal order
         if( !$pfError && !$pfDone )
         {
-           // pflog( 'Check data against internal order' );
-    
+           pflog( 'Check data against internal order' );
+            
+            $amount = $this->currency->format($order_info['total'], 'ZAR','',false);
             // Check order amount
-            if( !pfAmountsEqual( $pfData['amount_gross'],$order_info['total'] ) )
+            if( !pfAmountsEqual( $pfData['amount_gross'],$amount ) )
             {
                 $pfError = true;
                 $pfErrMsg = PF_ERR_AMOUNT_MISMATCH;
@@ -266,6 +267,10 @@ class ControllerPaymentPayFast extends Controller {
              } else {
                 $this->model_checkout_order->update($order_id, $order_status_id);
             }
+        }
+        else
+        {
+            pflog( "Errors:\n". print_r( $pfErrMsg, true ) );
         }   
     }
 }
