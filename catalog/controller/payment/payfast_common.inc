@@ -152,7 +152,12 @@ function pfValidSignature( $pfData = null, &$pfParamString = null )
     {
         if( $key != 'signature' ){
             $pfParamString .= $key .'='. urlencode( $val ) .'&';
-            }
+        }
+        else
+        {
+            break;
+        }
+
     }
 
     // Remove the last '&' from the parameter string
