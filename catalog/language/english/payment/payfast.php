@@ -24,9 +24,9 @@
 // Text
 $_['text_title']    = "PayFast";
 $_['text_pay_method'] = "Pay now using ";
-$_['text_logo']     =  "<img src='catalog/view/theme/default/image/payfast.png' alt='PayFast Logo' title='PayFast' align='middle' />";
-$_['text_reason'] 	= 'REASON';
-$_['text_sandbox']	= 'Warning: PayFast is set to work in \'Sandbox Mode\', your account will not be charged. ';
-$_['text_total']	= 'Shipping, Handling, Discounts & Taxes';
+$_['text_logo']     =  '<img src="http://' . $_SERVER['HTTP_HOST'] . '/catalog/view/theme/default/image/payfast.png" alt="PayFast Logo" title="PayFast" align="middle">';
+$_['text_reason']   = 'REASON';
+$_['text_sandbox']  = 'Warning: PayFast is set to work in \'Sandbox Mode\', your account will not be charged. ';
+$_['text_total']    = 'Shipping, Handling, Discounts & Taxes';
 $_['text_sale_description'] = 'Shipping, Handling, Discounts and Taxes Included';
 ?>
