@@ -24,7 +24,7 @@
 // Text
 $_['text_title']    = "PayFast";
 $_['text_pay_method'] = "Pay now using ";
-$_['text_logo']     =  '<img src="' . HTTP_SERVER . 'catalog/view/theme/default/image/payfast.png" alt="PayFast Logo" align="middle">';
+$_['text_logo']     =  '<img src="' . HTTP_SERVER . 'catalog/view/theme/default/image/payfast.png">';
 $_['text_reason']   = 'REASON';
 $_['text_sandbox']  = 'Warning: PayFast is set to work in \'Sandbox Mode\', your account will not be charged. ';
 $_['text_total']    = 'Shipping, Handling, Discounts & Taxes';

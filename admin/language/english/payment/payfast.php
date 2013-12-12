@@ -22,27 +22,27 @@
  * @version    1.1.1
  */
 // Heading
-$_['heading_title']					 = 'PayFast.co.za';
+$_['heading_title']                  = 'PayFast.co.za';
 
 // Text
-$_['text_payment']					 = 'Payment';
-$_['text_success']					 = 'Success!';
-$_['text_payfast']				     = '<a href="https://www.payfast.co.za" title><img src="view/image/payment/payfast.png" alt="PayFast" title="PayFast" border="0" /></a>';
+$_['text_payment']                   = 'Payment';
+$_['text_success']                   = 'Success!';
+$_['text_payfast']                   = '<a href="https://www.payfast.co.za" ><img src="' . HTTP_SERVER . 'view/image/payment/payfast.png" border="0" /></a>';
 $_['text_debug']                     = 'Debug'; 
 // Entry
 
-$_['entry_sandbox']					 = 'Sandbox Mode:';
+$_['entry_sandbox']                  = 'Sandbox Mode:';
 $_['entry_total']                    = 'Total:<br /><span class="help">The checkout total the order must reach before this payment method becomes active.</span>';
 $_['entry_completed_status']         = 'Payment Completed Status:';
-$_['entry_failed_status']			 = 'Payment Failed Status:';
-$_['entry_cancelled_status']		 = 'Payment Cancelled Status:';
-$_['entry_geo_zone']				 = 'Geo Zone:';
-$_['entry_status']					 = 'Status:';
-$_['entry_sort_order']				 = 'Sort Order:';
+$_['entry_failed_status']            = 'Payment Failed Status:';
+$_['entry_cancelled_status']         = 'Payment Cancelled Status:';
+$_['entry_geo_zone']                 = 'Geo Zone:';
+$_['entry_status']                   = 'Status:';
+$_['entry_sort_order']               = 'Sort Order:';
 $_['entry_merchant_id']              = 'PayFast Merchant ID:';
 $_['entry_merchant_key']             = 'PayFast Merchant Key:';
 
 // Error
-$_['error_permission']				 = 'Warning: You do not have permission to modify the PayFast payment!';
+$_['error_permission']               = 'Warning: You do not have permission to modify the PayFast payment!';
 
 ?>
