@@ -71,9 +71,9 @@ class ControllerPaymentPayFast extends Controller {
                 $merchant_key = '46f0cd694581a';
                
             }
-            $return_url = defined(HTTPS_SERVER) ? HTTPS_SERVER."index.php?route=checkout/success" : HTTPS_SERVER."index.php?route=checkout/success";//$this->url->link('checkout/success','',$config->get('config_use_ssl')?'SSL':'NONSSL');           
-            $cancel_url = defined(HTTPS_SERVER) ? HTTPS_SERVER."index.php?route=checkout/checkout" : HTTPS_SERVER."index.php?route=checkout/checkout";// $this->url->link('checkout/checkout','',$config->get('config_use_ssl')?'SSL':'NONSSL');
-            $notify_url = defined(HTTPS_SERVER) ? HTTPS_SERVER."index.php?route=payment/payfast/callback" : HTTPS_SERVER."index.php?route=payment/payfast/callback";// $this->url->link('payment/payfast/callback','',$config->get('config_use_ssl')?'SSL':'NONSSL');            
+            $return_url = HTTP_SERVER."index.php?route=checkout/success";//$this->url->link('checkout/success','',$config->get('config_use_ssl')?'SSL':'NONSSL');           
+            $cancel_url = HTTP_SERVER."index.php?route=checkout/checkout";// $this->url->link('checkout/checkout','',$config->get('config_use_ssl')?'SSL':'NONSSL');
+            $notify_url = HTTP_SERVER."index.php?route=payment/payfast/callback";// $this->url->link('payment/payfast/callback','',$config->get('config_use_ssl')?'SSL':'NONSSL');            
             $name_first = html_entity_decode($order_info['payment_firstname'], ENT_QUOTES, 'UTF-8');
             $name_last = html_entity_decode($order_info['payment_lastname'], ENT_QUOTES, 'UTF-8');
             $email_address = $order_info['email'];            
