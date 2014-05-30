@@ -79,8 +79,8 @@ class ControllerPaymentPayFast extends Controller {
             $email_address = $order_info['email'];            
             $m_payment_id = $this->session->data['order_id'];
             $amount = $this->currency->format($order_info['total'], $order_info['currency_code'],'',false);
-            $item_name = urlencode($this->config->get('config_name') . ' - #' . $this->session->data['order_id']);
-            $item_description = urlencode($this->language->get('text_sale_description'));
+            $item_name = $this->config->get('config_name') . ' - #' . $this->session->data['order_id'];
+            $item_description = $this->language->get('text_sale_description');
             $custom_str1 = $this->session->data['order_id'];  
             
             
