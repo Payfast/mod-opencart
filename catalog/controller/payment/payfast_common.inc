@@ -24,9 +24,9 @@
 //// Create user agent string
 // User agent constituents (for cURL)
 define( 'PF_SOFTWARE_NAME', 'Opencart' );
-define( 'PF_SOFTWARE_VER', "1.5.4" );
+define( 'PF_SOFTWARE_VER', "1.5.6" );
 define( 'PF_MODULE_NAME', 'PayFast-Opencart' );
-define( 'PF_MODULE_VER', '1.1.1' );
+define( 'PF_MODULE_VER', '1.2.1' );
 
 // Features
 // - PHP

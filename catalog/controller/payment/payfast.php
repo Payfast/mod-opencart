@@ -19,7 +19,7 @@
  * @author     Ron Darby
  * @copyright  2009-2012 PayFast (Pty) Ltd
  * @license    http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @version    1.1.1
+ * @version    1.2.1
  */
 
 include('payfast_common.inc');
@@ -95,8 +95,8 @@ class ControllerPaymentPayFast extends Controller {
                 'email_address'=>$email_address,
                 'm_payment_id'=>$m_payment_id,
                 'amount'=>$amount,
-                'item_name'=>$item_name,
-                'item_description'=>$item_description,
+                'item_name'=>html_entity_decode( $item_name ),
+                'item_description'=>html_entity_decode( $item_description ),
                 'custom_str1'=>$custom_str1
             );
             $secureString = '';
@@ -152,7 +152,8 @@ class ControllerPaymentPayFast extends Controller {
         
             // Posted variables from ITN
             $pfData = pfGetData();
-        
+            $pfData['item_name'] = html_entity_decode( $pfData['item_name'] );            
+            $pfData['item_description'] = html_entity_decode( $pfData['item_description'] );
             pflog( 'PayFast Data: '. print_r( $pfData, true ) );
         
             if( $pfData === false )
