@@ -41,6 +41,9 @@ $_['entry_status']                   = 'Status:';
 $_['entry_sort_order']               = 'Sort Order:';
 $_['entry_merchant_id']              = 'PayFast Merchant ID:';
 $_['entry_merchant_key']             = 'PayFast Merchant Key:';
+$_['entry_passphrase']             = 'PayFast Secure Passphrase:';
+$_['entry_passphrase_info']             = 'ONLY INSERT A VALUE INTO THE SECURE PASSPHRASE IF YOU HAVE SET THIS ON THE INTEGRATION PAGE OF THE LOGGED IN AREA OF THE PAYFAST WEBSITE!!!!!';
+
 
 // Error
 $_['error_permission']               = 'Warning: You do not have permission to modify the PayFast payment!';

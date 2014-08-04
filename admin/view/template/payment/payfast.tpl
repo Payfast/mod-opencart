@@ -68,7 +68,11 @@
               <?php echo $text_no; ?>
              </td>
           </tr>
-         
+          <tr>
+            <td><?php echo $entry_passphrase; ?>
+            <span style="font-weight: bold;font-size:10px;"><?php echo $entry_passphrase_info; ?></span></td>
+            <td><input type="text" name="payfast_passphrase" value="<?php echo $payfast_passphrase; ?>" /></td>
+          </tr>         
           <tr>
             <td><?php echo $entry_total; ?></td>
             <td><input type="text" name="payfast_total" value="<?php echo $payfast_total; ?>" /></td>

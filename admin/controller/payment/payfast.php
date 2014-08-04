@@ -61,7 +61,8 @@ class ControllerPaymentPayFast extends Controller {
 		$this->data['entry_sort_order'] = $this->language->get('entry_sort_order');
         $this->data['entry_merchant_id'] = $this->language->get('entry_merchant_id');
         $this->data['entry_merchant_key'] = $this->language->get('entry_merchant_key');
-        $this->data['text_debug'] = $this->language->get('text_debug');
+        $this->data['text_debug'] = $this->language->get('text_debug');        
+        $this->data['entry_passphrase_info'] = $this->language->get('entry_passphrase_info');
         
 		$this->data['button_save'] = $this->language->get('button_save');
 		$this->data['button_cancel'] = $this->language->get('button_cancel');
@@ -117,6 +118,11 @@ class ControllerPaymentPayFast extends Controller {
 			$this->data['payfast_sandbox'] = $this->request->post['payfast_sandbox'];
 		} else {
 			$this->data['payfast_sandbox'] = $this->config->get('payfast_sandbox');
+		}
+		if (isset($this->request->post['payfast_passphrase'])) {
+			$this->data['payfast_passphrase'] = $this->request->post['payfast_passphrase'];
+		} else {
+			$this->data['payfast_passphrase'] = $this->config->get('payfast_passphrase');
 		}
 
 		if (isset($this->request->post['payfast_transaction'])) {

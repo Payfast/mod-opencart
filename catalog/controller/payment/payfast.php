@@ -105,7 +105,15 @@ class ControllerPaymentPayFast extends Controller {
                 $secureString .= $k.'='.urlencode(trim($v)).'&';
                 $this->data[$k] = $v;        
             }
-            $secureString = substr( $secureString, 0, -1 );
+            $passphrase = $this->config->get('payfast_passphrase');
+            if(  !empty( $passphrase ) && !$this->config->get('payfast_sandbox')  )
+            {
+                $secureString = $secureString.'passphrase='.$this->config->get('payfast_passphrase');
+            }
+            else
+            {
+                $secureString = substr( $secureString, 0, -1 );
+            }
             
             $securityHash = md5($secureString);
             $this->data['signature'] = $securityHash;
@@ -167,9 +175,10 @@ class ControllerPaymentPayFast extends Controller {
         if( !$pfError && !$pfDone )
         {
             pflog( 'Verify security signature' );
-        
+            $passphrase = $this->config->get('payfast_passphrase');
+            $pfPassphrase = $this->config->get( 'payfast_sandbox' ) ? null : ( !empty( $passphrase ) ? $passphrase : null );
             // If signature different, log for debugging
-            if( !pfValidSignature( $pfData, $pfParamString ) )
+            if( !pfValidSignature( $pfData, $pfParamString, $pfPassphrase ) )
             {
                 $pfError = true;
                 $pfErrMsg = PF_ERR_INVALID_SIGNATURE;
