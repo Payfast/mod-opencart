@@ -145,7 +145,7 @@ function pfGetData()
  * 
  * @author Jonathan Smit
  */
-unction pfValidSignature( $pfData = null, &$pfParamString = null, $pfPassphrase=null )
+function pfValidSignature( $pfData = null, &$pfParamString = null, $pfPassphrase = null )
 {
     // Dump the submitted variables and calculate security signature
     foreach( $pfData as $key => $val )
@@ -155,6 +155,7 @@ unction pfValidSignature( $pfData = null, &$pfParamString = null, $pfPassphrase=
             $pfParamString .= $key .'='. urlencode( $val ) .'&';
         }
     }
+    
     if( is_null( $pfPassphrase ) )
     {
         $pfParamString = substr( $pfParamString, 0, -1 );
@@ -163,6 +164,7 @@ unction pfValidSignature( $pfData = null, &$pfParamString = null, $pfPassphrase=
     {
         $pfParamString = $pfParamString."passphrase=".$pfPassphrase;
     }
+    
     $signature = md5( $pfParamString );
     
     $result = ( $pfData['signature'] == $signature );
