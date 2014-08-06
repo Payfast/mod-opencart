@@ -108,7 +108,7 @@ class ControllerPaymentPayFast extends Controller {
             $passphrase = $this->config->get('payfast_passphrase');
             if(  !empty( $passphrase ) && !$this->config->get('payfast_sandbox')  )
             {
-                $secureString = $secureString.'passphrase='.$this->config->get('payfast_passphrase');
+                $secureString = $secureString.'passphrase=' . urlencode( $this->config->get('payfast_passphrase') );
             }
             else
             {
