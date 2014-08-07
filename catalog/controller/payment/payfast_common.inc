@@ -156,13 +156,11 @@ function pfValidSignature( $pfData = null, &$pfParamString = null, $pfPassphrase
         }
     }
     
-    if( is_null( $pfPassphrase ) )
+    $pfParamString = substr( $pfParamString, 0, -1 );
+
+    if( !is_null( $pfPassphrase ) )
     {
-        $pfParamString = substr( $pfParamString, 0, -1 );
-    }
-    else
-    {
-        $pfParamStringWithPassphrase = $pfParamString."passphrase=". urlencode( $pfPassphrase );
+        $pfParamStringWithPassphrase = $pfParamString."&passphrase=". urlencode( $pfPassphrase );
     }
     
     $signature = md5( $pfParamStringWithPassphrase );
