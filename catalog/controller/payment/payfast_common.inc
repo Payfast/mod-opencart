@@ -161,10 +161,13 @@ function pfValidSignature( $pfData = null, &$pfParamString = null, $pfPassphrase
     if( !is_null( $pfPassphrase ) )
     {
         $pfParamStringWithPassphrase = $pfParamString."&passphrase=". urlencode( $pfPassphrase );
+        $signature = md5( $pfParamStringWithPassphrase );
     }
-    
-    $signature = md5( $pfParamStringWithPassphrase );
-    
+    else
+    {
+        $signature = md5( $pfParamString );
+    }
+        
     $result = ( $pfData['signature'] == $signature );
 
     pflog( 'Signature = '. ( $result ? 'valid' : 'invalid' ) );
