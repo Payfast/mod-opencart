@@ -40,9 +40,9 @@ I4. n the PayFast Settings block, use the following settings:
 8. Click Save
 
 ******************************************************************************
-*                                                                            *
-*    Please see the URL below for all information concerning this module:    *
-*                                                                            *
-*                 https://www.payfast.co.za/shopping-carts/opencart/         *
-*                                                                            *
+
+    Please see the URL below for all information concerning this module:
+
+                 https://www.payfast.co.za/shopping-carts/opencart/
+
 ******************************************************************************
