@@ -1,0 +1,179 @@
+{# Copyright (c) 2023 PayFast (Pty) Ltd #}
+{# You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof. #}
+{# Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way. #}
+
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="d-flex flex-row-reverse">
+                <button type="submit" form="form-payfast" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><em class="fa fa-save"></em></button>
+                <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><em class="fa fa-reply"></em></a></div>
+            <h1><strong>{{ heading_title }}</strong></h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li class="breadcrumb-item d-inline"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+        {% if error_warning %}
+            <div class="alert alert-danger alert-dismissible"><em class="fa fa-exclamation-circle"></em> {{ error_warning }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h5 class="m-3 panel-title"><em class="fa fa-pencil"></em> {{ text_edit }}</h5>
+            </div>
+            <div class="panel-body bg-white">
+                <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-payfast" class="form-horizontal">
+                    <div class="py-4">
+                        <div class="row align-items-center form-group required">
+                            <label class="d-flex flex-row-reverse col-sm-2 col-form-label control-label" for="entry-payfast_merchant_id"><span data-toggle="tooltip" title="{{ help_payfast_merchant_id }}">{{ entry_payfast_merchant_id }}</span></label>
+                            <div class="col-sm-3">
+                                <input type="text" name="payment_payfast_merchant_id" value="{{ payment_payfast_merchant_id }}" placeholder="{{ entry_payfast_merchant_id }}" id="entry-payfast_merchant_id" class="form-control" />
+                                {% if error_payfast_merchant_id %}
+                                    <div class="text-danger">{{ error_payfast_merchant_id }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="my-4 row align-items-center form-group required">
+                            <label class="col-form-label d-flex flex-row-reverse col-sm-2 col-form-label control-label" for="entry-payfast_merchant_key"><span data-toggle="tooltip" title="{{ help_payfast_merchant_key }}">{{ entry_payfast_merchant_key }}</span></label>
+                            <div class="col-sm-3">
+                                <input type="text" name="payment_payfast_merchant_key" value="{{ payment_payfast_merchant_key }}" placeholder="{{ entry_payfast_merchant_key }}" id="entry-payfast_merchant_key" class="form-control" />
+                                {% if error_payfast_merchant_key %}
+                                    <div class="text-danger">{{ error_payfast_merchant_key }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="my-4 row align-items-center form-group">
+                            <label class="col-form-label d-flex flex-row-reverse col-sm-2 col-form-label control-label" for="input-test">{{ entry_payfast_sandbox }}</label>
+                            <div class="col-sm-1">
+                                <select name="payment_payfast_sandbox" id="input-test" class="form-control">
+                                    {% if payment_payfast_sandbox %}
+                                        <option value="1" selected="selected">{{ text_yes }}</option>
+                                        <option value="0">{{ text_no }}</option>
+                                    {% else %}
+                                        <option value="1">{{ text_yes }}</option>
+                                        <option value="0" selected="selected">{{ text_no }}</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="my-4 row align-items-center form-group">
+                            <label class="col-form-label d-flex flex-row-reverse col-sm-2 col-form-label control-label" for="entry-payfast_debug"><span data-toggle="tooltip" title="{{ help_payfast_debug }}">{{ entry_payfast_debug }}</span></label>
+                            <div class="col-sm-2">
+                                <label class="radio-inline">
+                                    {% if payment_payfast_debug %}
+                                        <input type="radio" name="payment_payfast_debug" value="1" checked="checked" />
+                                        {{ button_enable }}
+                                    {% else %}
+                                        <input type="radio" name="payment_payfast_debug" value="1" />
+                                        {{ button_enable }}
+                                    {% endif %}
+                                </label>
+                                <label class="radio-inline">
+                                    {% if not payment_payfast_debug %}
+                                        <input type="radio" name="payment_payfast_debug" value="0" checked="checked" />
+                                        {{ button_disable }}
+                                    {% else %}
+                                        <input type="radio" name="payment_payfast_debug" value="0" />
+                                        {{ button_disable }}
+                                    {% endif %}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="my-4 row align-items-center form-group">
+                            <label class="col-form-label d-flex flex-row-reverse col-sm-2 col-form-label control-label" for="entry-payfast_passphrase"><span data-toggle="tooltip" title="{{ help_payfast_passphrase }}">{{ entry_payfast_passphrase }}</span></label>
+                            <div class="col-sm-3 mb-2">
+                                <input type="text" name="payment_payfast_passphrase" value="{{ payment_payfast_passphrase }}" placeholder="{{ entry_payfast_passphrase }}" id="entry-payfast_passphrase" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="my-4 row align-items-center form-group">
+                            <label class="col-form-label d-flex flex-row-reverse col-sm-2 col-form-label control-label" for="input-geo-zone">{{ entry_geo_zone }}</label>
+                            <div class="col-sm-1">
+                                <select name="payment_payfast_geo_zone_id" id="input-geo-zone" class="form-control">
+                                    <option value="0">{{ text_all_zones }}</option>
+                                    {% for geo_zone in geo_zones %}
+                                        {% if geo_zone.geo_zone_id == payment_payfast_geo_zone_id %}
+                                            <option value="{{ geo_zone.geo_zone_id }}" selected="selected">{{ geo_zone.name }}</option>
+                                        {% else %}
+                                            <option value="{{ geo_zone.geo_zone_id }}">{{ geo_zone.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4 row align-items-center form-group">
+                            <label class="col-form-label d-flex flex-row-reverse col-sm-2 col-form-label control-label" for="input-status">{{ entry_status }}</label>
+                            <div class="col-sm-1">
+                                <select name="payment_payfast_status" id="input-status" class="form-control">
+                                    {% if payment_payfast_status %}
+                                        <option value="1" selected="selected">{{ text_enabled }}</option>
+                                        <option value="0">{{ text_disabled }}</option>
+                                    {% else %}
+                                        <option value="1">{{ text_enabled }}</option>
+                                        <option value="0" selected="selected">{{ text_disabled }}</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="my-4 mb-2 row align-items-center form-group">
+                            <label class="col-form-label d-flex flex-row-reverse col-sm-2 col-form-label control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                            <div class="col-sm-1">
+                                <input type="text" name="payment_payfast_sort_order" value="{{ payment_payfast_sort_order }}" id="input-sort-order" class="form-control" />
+
+                            </div>
+                        </div>
+                        <hr class="mx-4">
+                        <div class="my-4 row align-items-center form-group">
+                            <label class="col-form-label d-flex flex-row-reverse col-sm-2 col-form-label control-label">{{ entry_completed_status }}</label>
+                            <div class="col-sm-1">
+                                <select name="payment_payfast_completed_status_id" class="form-control">
+                                    {% for order_status in order_statuses %}
+                                        {% if order_status.order_status_id == payment_payfast_completed_status_id %}
+                                            <option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+                                        {% else %}
+                                            <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="my-4 row align-items-center form-group">
+                            <label class="col-form-label d-flex flex-row-reverse col-sm-2 col-form-label control-label">{{ entry_failed_status }}</label>
+                            <div class="col-sm-1">
+                                <select name="payment_payfast_failed_status_id" class="form-control">
+                                    {% for order_status in order_statuses %}
+                                        {% if order_status.order_status_id == payment_payfast_failed_status_id %}
+                                            <option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+                                        {% else %}
+                                            <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="my-4 row align-items-center form-group">
+                            <label class="col-form-label d-flex flex-row-reverse col-sm-2 col-form-label control-label">{{ entry_cancelled_status }}</label>
+                            <div class="col-sm-1">
+                                <select name="payment_payfast_cancelled_status_id" class="form-control">
+                                    {% for order_status in order_statuses %}
+                                        {% if order_status.order_status_id == payment_payfast_cancelled_status_id %}
+                                            <option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+                                        {% else %}
+                                            <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{ footer }}
