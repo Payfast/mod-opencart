@@ -1,202 +1,238 @@
 <?php
+
+/** @noinspection PhpUndefinedConstantInspection */
+
 /**
- * admin/controller/payment/payfast.php
- *
- * Copyright (c) 2008 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason, you may not use this plugin / code or part thereof.
- * Except as expressly indicated in this licence, you may not use, copy, modify or distribute this plugin / code or part thereof in any way.
- * 
- * @author     Ron Darby
- * @version    1.1.1
+ * Copyright (c) 2023 PayFast (Pty) Ltd
+ * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in
+ * conjunction with a registered and active PayFast account. If your PayFast account is terminated for any reason,
+ * you may not use this plugin / code or part thereof. Except as expressly indicated in this licence, you may not use,
+ * copy, modify or distribute this plugin / code or part thereof in any way.
  */
 
-class ControllerPaymentPayFast extends Controller {
-	private $error = array();
+namespace Opencart\Admin\Controller\Extension\PayFast\Payment;
 
-	public function index() {
-		$this->load->language('payment/payfast');
+use Opencart\System\Engine\Controller;
 
-		$this->document->setTitle($this->language->get('heading_title'));
+/** @phpstan-ignore-next-line */
+class Payfast extends Controller /** @phpstan-ignore-line */
+{
+    private array $error = array();
+    private $tableName = DB_PREFIX . 'payfast_transaction';
+    public const LANGUAGE_LITERAL = 'extension/payfast/payment/payfast';
+    public const MARKETPLACE_LITERAL = 'marketplace/extension';
+    public const TOKEN_LITERAL = 'user_token=';
+    public const TYPE_LITERAL = '&type=payment';
 
-		$this->load->model('setting/setting');
+    public function index()
+    {
+        $this->load->language(self::LANGUAGE_LITERAL);
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-			$this->model_setting_setting->editSetting('payfast', $this->request->post);
+        $this->document->setTitle($this->language->get('heading_title'));
 
-			$this->session->data['success'] = $this->language->get('text_success');
+        $this->load->model('setting/setting');
 
-			$this->redirect($this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL'));
-		}
+        if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+            $this->model_setting_setting->editSetting('payment_payfast', $this->request->post);
 
-		$this->data['heading_title'] = $this->language->get('heading_title');
+            $this->session->data['success'] = $this->language->get('text_success');
 
-		$this->data['text_enabled'] = $this->language->get('text_enabled');
-		$this->data['text_disabled'] = $this->language->get('text_disabled');
-		$this->data['text_all_zones'] = $this->language->get('text_all_zones');
-		$this->data['text_yes'] = $this->language->get('text_yes');
-		$this->data['text_no'] = $this->language->get('text_no');
-		$this->data['text_authorization'] = $this->language->get('text_authorization');
-		$this->data['text_sale'] = $this->language->get('text_sale');
+            $this->response->redirect($this->url->link(
+                self::MARKETPLACE_LITERAL,
+                self::TOKEN_LITERAL . $this->session->data['user_token'] . self::TYPE_LITERAL,
+                true
+            ));
+        }
 
-		$this->data['entry_sandbox'] = $this->language->get('entry_sandbox');
-		$this->data['entry_debug'] = $this->language->get('entry_debug');
-		$this->data['entry_total'] = $this->language->get('entry_total');	
-		$this->data['entry_completed_status'] = $this->language->get('entry_completed_status');
-		$this->data['entry_failed_status'] = $this->language->get('entry_failed_status');
-		$this->data['entry_cancelled_status'] = $this->language->get('entry_cancelled_status');
-		$this->data['entry_geo_zone'] = $this->language->get('entry_geo_zone');
-		$this->data['entry_status'] = $this->language->get('entry_status');
-		$this->data['entry_sort_order'] = $this->language->get('entry_sort_order');
-        $this->data['entry_merchant_id'] = $this->language->get('entry_merchant_id');
-        $this->data['entry_merchant_key'] = $this->language->get('entry_merchant_key');
-        $this->data['text_debug'] = $this->language->get('text_debug');        
-        $this->data['entry_passphrase_info'] = $this->language->get('entry_passphrase_info');
-        
-		$this->data['button_save'] = $this->language->get('button_save');
-		$this->data['button_cancel'] = $this->language->get('button_cancel');
+        if (isset($this->error['warning'])) {
+            $data['error_warning'] = $this->error['warning'];
+        } else {
+            $data['error_warning'] = '';
+        }
 
- 		if (isset($this->error['warning'])) {
-			$this->data['error_warning'] = $this->error['warning'];
-		} else {
-			$this->data['error_warning'] = '';
-		}
+        if (isset($this->error['payfast_merchant_id'])) {
+            $data['error_payfast_merchant_id'] = $this->error['payfast_merchant_id'];
+        } else {
+            $data['error_payfast_merchant_id'] = '';
+        }
 
- 		if (isset($this->error['email'])) {
-			$this->data['error_email'] = $this->error['email'];
-		} else {
-			$this->data['error_email'] = '';
-		}
+        if (isset($this->error['payfast_merchant_key'])) {
+            $data['error_payfast_merchant_key'] = $this->error['payfast_merchant_key'];
+        } else {
+            $data['error_payfast_merchant_key'] = '';
+        }
 
-		$this->data['breadcrumbs'] = array();
+        if (isset($this->error['signature'])) {
+            $data['error_signature'] = $this->error['signature'];
+        } else {
+            $data['error_signature'] = '';
+        }
 
-   		$this->data['breadcrumbs'][] = array(
-       		'text'      => $this->language->get('text_home'),
-			'href'      => $this->url->link('common/home', 'token=' . $this->session->data['token'], 'SSL'),      		
-      		'separator' => false
-   		);
+        $data['breadcrumbs'] = array();
 
-   		$this->data['breadcrumbs'][] = array(
-       		'text'      => $this->language->get('text_payment'),
-			'href'      => $this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL'),
-      		'separator' => ' :: '
-   		);
+        $data['breadcrumbs'][] = array(
+            'text' => $this->language->get('text_home'),
+            'href' => $this->url->link(
+                'common/dashboard',
+                self::TOKEN_LITERAL . $this->session->data['user_token'],
+                true
+            )
+        );
 
-   		$this->data['breadcrumbs'][] = array(
-       		'text'      => $this->language->get('heading_title'),
-			'href'      => $this->url->link('payment/payfast', 'token=' . $this->session->data['token'], 'SSL'),
-      		'separator' => ' :: '
-   		);
+        $data['breadcrumbs'][] = array(
+            'text' => $this->language->get('text_extension'),
+            'href' => $this->url->link(
+                self::MARKETPLACE_LITERAL,
+                self::TOKEN_LITERAL . $this->session->data['user_token'] . self::TYPE_LITERAL,
+                true
+            )
+        );
 
-		$this->data['action'] = $this->url->link('payment/payfast', 'token=' . $this->session->data['token'], 'SSL');
+        $data['breadcrumbs'][] = array(
+            'text' => $this->language->get('heading_title'),
+            'href' => $this->url->link(
+                self::LANGUAGE_LITERAL,
+                self::TOKEN_LITERAL . $this->session->data['user_token'],
+                true
+            )
+        );
 
-		$this->data['cancel'] = $this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL');
+        $data['action'] = $this->url->link(
+            self::LANGUAGE_LITERAL,
+            self::TOKEN_LITERAL . $this->session->data['user_token'],
+            true
+        );
 
-		if (isset($this->request->post['payfast_merchant_id'])) {
-			$this->data['payfast_merchant_id'] = $this->request->post['payfast_merchant_id'];
-		} else {
-			$this->data['payfast_merchant_id'] = $this->config->get('payfast_merchant_id');
-		}
-        if (isset($this->request->post['payfast_merchant_key'])) {
-			$this->data['payfast_merchant_key'] = $this->request->post['payfast_merchant_key'];
-		} else {
-			$this->data['payfast_merchant_key'] = $this->config->get('payfast_merchant_key');
-		}
+        $data['cancel'] = $this->url->link(
+            self::MARKETPLACE_LITERAL,
+            self::TOKEN_LITERAL . $this->session->data['user_token'] . self::TYPE_LITERAL,
+            true
+        );
 
-		if (isset($this->request->post['payfast_sandbox'])) {
-			$this->data['payfast_sandbox'] = $this->request->post['payfast_sandbox'];
-		} else {
-			$this->data['payfast_sandbox'] = $this->config->get('payfast_sandbox');
-		}
-		if (isset($this->request->post['payfast_passphrase'])) {
-			$this->data['payfast_passphrase'] = $this->request->post['payfast_passphrase'];
-		} else {
-			$this->data['payfast_passphrase'] = $this->config->get('payfast_passphrase');
-		}
+        if (isset($this->request->post['payment_payfast_merchant_id'])) {
+            $data['payment_payfast_merchant_id'] = $this->request->post['payment_payfast_merchant_id'];
+        } else {
+            $data['payment_payfast_merchant_id'] = $this->config->get('payment_payfast_merchant_id');
+        }
 
-		if (isset($this->request->post['payfast_transaction'])) {
-			$this->data['payfast_transaction'] = $this->request->post['payfast_transaction'];
-		} else {
-			$this->data['payfast_transaction'] = $this->config->get('payfast_transaction');
-		}
+        if (isset($this->request->post['payment_payfast_merchant_key'])) {
+            $data['payment_payfast_merchant_key'] = $this->request->post['payment_payfast_merchant_key'];
+        } else {
+            $data['payment_payfast_merchant_key'] = $this->config->get('payment_payfast_merchant_key');
+        }
 
-		if (isset($this->request->post['payfast_debug'])) {
-			$this->data['payfast_debug'] = $this->request->post['payfast_debug'];
-		} else {
-			$this->data['payfast_debug'] = $this->config->get('payfast_debug');
-		}
-		
-		if (isset($this->request->post['payfast_total'])) {
-			$this->data['payfast_total'] = $this->request->post['payfast_total'];
-		} else {
-			$this->data['payfast_total'] = $this->config->get('payfast_total'); 
-		} 
-		
-		if (isset($this->request->post['payfast_completed_status_id'])) {
-			$this->data['payfast_completed_status_id'] = $this->request->post['payfast_completed_status_id'];
-		} else {
-			$this->data['payfast_completed_status_id'] = $this->config->get('payfast_completed_status_id');
-		}	
-						
-		if (isset($this->request->post['payfast_failed_status_id'])) {
-			$this->data['payfast_failed_status_id'] = $this->request->post['payfast_failed_status_id'];
-		} else {
-			$this->data['payfast_failed_status_id'] = $this->config->get('payfast_failed_status_id');
-		}	
-								
-		if (isset($this->request->post['payfast_cancelled_status_id'])) {
-			$this->data['payfast_cancelled_status_id'] = $this->request->post['payfast_cancelled_status_id'];
-		} else {
-			$this->data['payfast_cancelled_status_id'] = $this->config->get('payfast_cancelled_status_id');
-		}
-		
-		$this->load->model('localisation/order_status');
+        if (isset($this->request->post['payment_payfast_passphrase'])) {
+            $data['payment_payfast_passphrase'] = $this->request->post['payment_payfast_passphrase'];
+        } else {
+            $data['payment_payfast_passphrase'] = $this->config->get('payment_payfast_passphrase');
+        }
 
-		$this->data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
+        if (isset($this->request->post['payment_payfast_sandbox'])) {
+            $data['payment_payfast_sandbox'] = $this->request->post['payment_payfast_sandbox'];
+        } else {
+            $data['payment_payfast_sandbox'] = $this->config->get('payment_payfast_sandbox');
+        }
 
-		if (isset($this->request->post['payfast_geo_zone_id'])) {
-			$this->data['payfast_geo_zone_id'] = $this->request->post['payfast_geo_zone_id'];
-		} else {
-			$this->data['payfast_geo_zone_id'] = $this->config->get('payfast_geo_zone_id');
-		}
+        if (isset($this->request->post['payment_payfast_debug'])) {
+            $data['payment_payfast_debug'] = $this->request->post['payment_payfast_debug'];
+        } else {
+            $data['payment_payfast_debug'] = $this->config->get('payment_payfast_debug');
+        }
 
-		$this->load->model('localisation/geo_zone');
+        $this->load->model('localisation/order_status');
+        $data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
 
-		$this->data['geo_zones'] = $this->model_localisation_geo_zone->getGeoZones();
+        if (isset($this->request->post['payment_payfast_completed_status_id'])) {
+            $data['payment_payfast_completed_status_id'] = $this->request->post['payment_payfast_completed_status_id'];
+        } else {
+            $data['payment_payfast_completed_status_id'] = $this->config->get('payment_payfast_completed_status_id');
+        }
 
-		if (isset($this->request->post['payfast_status'])) {
-			$this->data['payfast_status'] = $this->request->post['payfast_status'];
-		} else {
-			$this->data['payfast_status'] = $this->config->get('payfast_status');
-		}
-		
-		if (isset($this->request->post['payfast_sort_order'])) {
-			$this->data['payfast_sort_order'] = $this->request->post['payfast_sort_order'];
-		} else {
-			$this->data['payfast_sort_order'] = $this->config->get('payfast_sort_order');
-		}
-        
-        
-		$this->template = 'payment/payfast.tpl';
-		$this->children = array(
-			'common/header',
-			'common/footer'
-		);
+        if (isset($this->request->post['payment_payfast_failed_status_id'])) {
+            $data['payment_payfast_failed_status_id'] = $this->request->post['payment_payfast_failed_status_id'];
+        } else {
+            $data['payment_payfast_failed_status_id'] = $this->config->get('payment_payfast_failed_status_id');
+        }
 
-		$this->response->setOutput($this->render());
-	}
+        if (isset($this->request->post['payment_payfast_cancelled_status_id'])) {
+            $data['payment_payfast_cancelled_status_id'] = $this->request->post['payment_payfast_cancelled_status_id'];
+        } else {
+            $data['payment_payfast_cancelled_status_id'] = $this->config->get('payment_payfast_cancelled_status_id');
+        }
 
-	private function validate() {
-		if (!$this->user->hasPermission('modify', 'payment/payfast')) {
-			$this->error['warning'] = $this->language->get('error_permission');
-		}
+        if (isset($this->request->post['payment_payfast_geo_zone_id'])) {
+            $data['payment_payfast_geo_zone_id'] = $this->request->post['payment_payfast_geo_zone_id'];
+        } else {
+            $data['payment_payfast_geo_zone_id'] = $this->config->get('payment_payfast_geo_zone_id');
+        }
 
-		
+        $this->load->model('localisation/geo_zone');
 
-		if (!$this->error) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+        $data['geo_zones'] = $this->model_localisation_geo_zone->getGeoZones();
+
+        if (isset($this->request->post['payment_payfast_status'])) {
+            $data['payment_payfast_status'] = $this->request->post['payment_payfast_status'];
+        } else {
+            $data['payment_payfast_status'] = $this->config->get('payment_payfast_status');
+        }
+
+        if (isset($this->request->post['payment_payfast_sort_order'])) {
+            $data['payment_payfast_sort_order'] = $this->request->post['payment_payfast_sort_order'];
+        } else {
+            $data['payment_payfast_sort_order'] = $this->config->get('payment_payfast_sort_order');
+        }
+        $data['help_total']             = $this->language->get('help_total');
+        $data['button_save']            = $this->language->get('button_save');
+        $data['button_cancel']          = $this->language->get('button_cancel');
+
+        $data['header'] = $this->load->controller('common/header');
+        $data['column_left'] = $this->load->controller('common/column_left');
+        $data['footer'] = $this->load->controller('common/footer');
+
+        $this->response->setOutput($this->load->view(self::LANGUAGE_LITERAL, $data));
+    }
+
+    public function install()
+    {
+        $query = <<<QUERY
+create table if not exists {$this->tableName} (
+    payfast_transaction_id int auto_increment primary key,
+    customer_id int not null,
+    order_id int not null,
+    payfast_reference varchar(255) not null,
+    payfast_data text null,
+    payfast_session text null,
+    date_created datetime not null,
+    date_modified datetime not null
+)
+QUERY;
+
+        $this->db->query($query);
+
+        $this->load->model('setting/setting');
+
+        $this->model_setting_setting->editValue('config', 'config_session_samesite', 'Lax');
+    }
+
+    public function uninstall()
+    {
+        $this->db->query("drop table if exists {$this->tableName}");
+    }
+
+    protected function validate()
+    {
+        if (!$this->user->hasPermission('modify', self::LANGUAGE_LITERAL)) {
+            $this->error['warning'] = $this->language->get('error_permission');
+        }
+
+        if (!$this->request->post['payment_payfast_merchant_id']) {
+            $this->error['payfast_merchant_id'] = $this->language->get('error_payfast_merchant_id');
+        }
+
+        if (!$this->request->post['payment_payfast_merchant_key']) {
+            $this->error['payfast_merchant_key'] = $this->language->get('error_payfast_merchant_key');
+        }
+
+        return !$this->error;
+    }
 }
-?>
