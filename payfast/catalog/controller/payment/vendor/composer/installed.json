@@ -1,0 +1,50 @@
+{
+    "packages": [
+        {
+            "name": "payfast/payfast-common",
+            "version": "v1.0.1",
+            "version_normalized": "1.0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Payfast/payfast-common.git",
+                "reference": "f37b4f0c46c065fa7f40edc8964226ca4b244a25"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Payfast/payfast-common/zipball/f37b4f0c46c065fa7f40edc8964226ca4b244a25",
+                "reference": "f37b4f0c46c065fa7f40edc8964226ca4b244a25",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "time": "2023-07-21T19:13:48+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Payfast\\PayfastCommon\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "App Inlet (Pty) Ltd",
+                    "email": "info@appinlet.com"
+                }
+            ],
+            "description": "Payfast common class for modules.",
+            "homepage": "https://github.com/PayFast/payfast-common",
+            "support": {
+                "issues": "https://github.com/Payfast/payfast-common/issues",
+                "source": "https://github.com/Payfast/payfast-common/tree/v1.0.1"
+            },
+            "install-path": "../payfast/payfast-common"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}
