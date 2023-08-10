@@ -37,10 +37,4 @@ In order to make the module “LIVE”, follow the instructions below:
 7. Merchant Key = <Login to Payfast -> Integration Page>
 8. Click Save
 
-******************************************************************************
-
-    Please see the URL below for all information concerning this module:
-
-                 https://payfast.io/integration/shopping-carts/opencart/
-
-******************************************************************************
+Please [click here](https://payfast.io/integration/shopping-carts/opencart/) for more information concerning this module.
