@@ -1,0 +1,11 @@
+=====================================
+Date	  : Version: Description
+=====================================
+
+2024-07-15: v1.1.0 : Integration with the Payfast common library.
+                     Update for OpenCart v4.0.2.3.
+                     Code quality and improvements.
+
+2023-06-26: v1.0.1 : Update for OpenCart v4.0.2.2.
+
+2023-01-06: v1.0.0 : Initial release.

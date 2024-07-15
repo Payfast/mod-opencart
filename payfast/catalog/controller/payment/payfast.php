@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2023 Payfast (Pty) Ltd
+ * Copyright (c) 2024 Payfast (Pty) Ltd
  * You (being anyone who is not Payfast (Pty) Ltd) may download and use this plugin / code in your own website in
  * conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason,
  * you may not use this plugin / code or part thereof. Except as expressly indicated in this licence, you may not use,
@@ -11,139 +11,93 @@
 namespace Opencart\Catalog\Controller\Extension\Payfast\Payment;
 
 use Opencart\System\Engine\Controller;
-use Opencart\System\Library\Cart\Customer;
-
 use Payfast\PayfastCommon\PayfastCommon;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
 // User agent constituents (for cURL)
-define("PF_SOFTWARE_NAME", 'OpenCart');
-define("PF_SOFTWARE_VER", '4.0.2.2');
-define("PF_MODULE_NAME", 'PF_OpenCart');
-define("PF_MODULE_VER", '1.0.1');
+define('PF_SOFTWARE_NAME', 'OpenCart');
+define('PF_SOFTWARE_VER', '4.0.2.3');
+define('PF_MODULE_NAME', 'PF_OpenCart');
+define('PF_MODULE_VER', '1.1.0');
 
+/**
+ * Payfast class
+ *
+ * @property mixed|object|null $config
+ * @property mixed|object|null $load
+ * @property mixed|object|null $language
+ * @property mixed|object|null $model_checkout_order
+ * @property mixed|object|null $session
+ * @property mixed|object|null $cart
+ * @property mixed|object|null $db
+ * @property mixed|object|null $url
+ */
 class Payfast extends Controller
 {
     public string $pfHost = '';
     public const CHECKOUT_ORDER_LITERAL = 'checkout/order';
+
+    /**
+     * @param $registry
+     */
     public function __construct($registry)
     {
         parent::__construct($registry);
         $this->pfHost = ($this->config->get('payment_payfast_sandbox') ? 'sandbox' : 'www') . '.payfast.co.za';
-
     }
 
-    public function index()
+    /**
+     * @return mixed
+     */
+    public function index(): mixed
     {
         $this->load->language('extension/payfast/payment/payfast');
-        $data[ 'text_sandbox' ] = $this->language->get('text_sandbox');
-        $data[ 'button_confirm' ] = $this->language->get('button_confirm');
-        $data[ 'sandbox' ] = $this->config->get('payment_payfast_sandbox');
-        $data[ 'action' ] = 'https://' . $this->pfHost . '/eng/process';
+        $payfast_data                   = [];
+        $payfast_data['text_sandbox']   = $this->language->get('text_sandbox');
+        $payfast_data['button_confirm'] = $this->language->get('button_confirm');
+        $payfast_data['sandbox']        = $this->config->get('payment_payfast_sandbox');
+        $payfast_data['action']         = 'https://' . $this->pfHost . '/eng/process';
         $this->load->model(self::CHECKOUT_ORDER_LITERAL);
-        $orderInfo = $this->model_checkout_order->getOrder($this->session->data[ 'order_id' ]);
-        if ($orderInfo) {
-            $orderInfo['currency_code'] = 'ZAR';
-            $data['recurring'] = false;
-            foreach ($this->cart->getProducts() as $product) {
-                if ($product['recurring'] ?? false) {
-                    $data['recurring'] = true;
-                    if ($product['recurring']['frequency'] == 'month') {
-                        $frequency = 3;
-                    }
+        $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+        $load_view  = '';
+        if ($order_info) {
+            $order_info['currency_code'] = 'ZAR';
+            $payfast_data['recurring']   = false;
 
-                    if ($product['recurring']['frequency'] == 'year') {
-                        $frequency = 6;
-                    }
-
-                    $cycles = $product['recurring']['duration'];
-                    $recurringAmount = number_format($product['recurring']['price'], 2, '.', '')/100;
-                    $customStr3 = $product['recurring']['recurring_id'];
-                    $customStr4 = $this->session->data[ 'order_id' ];
-                    $customStr5 = $product['product_id'];
-                    /** @noinspection PhpUndefinedConstantInspection */
-                    $this->db->query("INSERT INTO `" . DB_PREFIX . "order_recurring` SET `order_id` = '" .
-                        $this->session->data[ 'order_id' ] . "', `reference` = '" .
-                        $this->session->data[ 'order_id' ] . "',
-                                      `product_id` = '" . $product['product_id'] . "',
-                                      `product_name` = '" . $product['name'] . "', `product_quantity` = '" .
-                        $product['quantity'] . "', `recurring_id` = '" .
-                        $product['recurring']['recurring_id'] . "',
-                                      `recurring_name` = '" . $product['recurring']['name'] .
-                        "', `recurring_description` = '" . $product['recurring']['name'] . "',
-                                      `recurring_frequency` = '" . $frequency . "', `recurring_cycle` = '1',
-                                       `recurring_duration` = '" . $cycles . "',
-                                      `recurring_price` = '" . $recurringAmount . "', `status` = '6',
-                                       `date_added` = NOW()");
-                }
-            }
-
-            $merchantId = $this->config->get('payment_payfast_merchant_id');
-            $merchantKey = $this->config->get('payment_payfast_merchant_key');
             $passphrase = $this->config->get('payment_payfast_passphrase');
-            $returnUrl = $this->url->link('checkout/success');
-            $cancelUrl = $this->url->link('checkout/checkout', '', 'SSL');
-            $notifyUrl = filter_var(
-                $this->url->link('extension/payfast/payment/payfast|callback', '', true),
-                FILTER_SANITIZE_URL
-            );
-            $nameFirst = html_entity_decode($orderInfo[ 'payment_firstname' ], ENT_QUOTES, 'UTF-8');
-            $nameLast = html_entity_decode($orderInfo[ 'payment_lastname' ], ENT_QUOTES, 'UTF-8');
-            $emailAddress = $orderInfo[ 'email' ];
-            $mPaymentId = $this->session->data[ 'order_id' ];
-            $amount = filter_var(number_format($orderInfo['total'], 2), FILTER_SANITIZE_NUMBER_INT)/100;
-            $itemName = $this->config->get('config_name') . ' - #' . $this->session->data[ 'order_id' ];
-            $itemDescription = $this->language->get('text_sale_description');
-            $customStr1 = PF_MODULE_NAME . '_' . PF_SOFTWARE_VER .
-                '_' . PF_MODULE_VER;
-            $payArray = array(
-                'merchant_id' => $merchantId, 'merchant_key' => $merchantKey, 'return_url' => $returnUrl,
-                'cancel_url' => $cancelUrl, 'notify_url' => $notifyUrl, 'name_first' => $nameFirst,
-                'name_last' => $nameLast, 'email_address' => $emailAddress, 'm_payment_id' => $mPaymentId,
-                'amount' => $amount, 'item_name' => html_entity_decode($itemName),
-                'item_description' => html_entity_decode($itemDescription), 'custom_str1' => $customStr1
-            );
-            if ($data['recurring']) {
-                $payArray['custom_str2'] = date('Y-m-d');
-                $payArray['custom_str3'] = $customStr3 ?? '';
-                $payArray['custom_str4'] = $customStr4 ?? '';
-                $payArray['custom_str5'] = $customStr5 ?? '';
-                $payArray['subscription_type'] = '1';
-                $payArray['billing_date'] = date('Y-m-d');
-                $payArray['recurring_amount'] = $recurringAmount ?? '';
-                $payArray['frequency'] = $frequency ?? '';
-                $payArray['cycles'] = $cycles ?? '';
-            }
+            $pay_array  = $this->handleRecurringP($order_info, $payfast_data);
 
-            $secureString = '';
-            foreach ($payArray as $k => $v) {
-                $secureString .= $k . '=' . urlencode(trim($v)) . '&';
-                $data[ $k ] = $v;
+            $secure_string = '';
+            foreach ($pay_array as $pay_array_key => $value) {
+                $secure_string                .= $pay_array_key . '=' . urlencode(trim($value)) . '&';
+                $payfast_data[$pay_array_key] = $value;
             }
 
             if (!empty($passphrase)) {
-                $secureString = $secureString . 'passphrase=' . urlencode($passphrase);
+                $secure_string = $secure_string . 'passphrase=' . urlencode($passphrase);
             } else {
-                $secureString = substr($secureString, 0, -1);
+                $secure_string = substr($secure_string, 0, -1);
             }
 
-            $securityHash = md5($secureString);
-            $data[ 'signature' ] = $securityHash;
-            $data[ 'user_agent' ] = 'OpenCart 4.0';
+            $security_hash              = md5($secure_string);
+            $payfast_data['signature']  = $security_hash;
+            $payfast_data['user_agent'] = 'OpenCart 4.0';
 
-
-            /** @noinspection PhpUndefinedConstantInspection */
-            if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') .
-                '/template/extension/payfast/payment/payfast')) {
-                return $this->load->view(
+            if (file_exists(
+                DIR_TEMPLATE . $this->config->get('config_template') .
+                '/template/extension/payfast/payment/payfast'
+            )) {
+                $load_view = $this->load->view(
                     $this->config->get('config_template') . '/template/extension/payfast/payment/payfast',
-                    $data
+                    $payfast_data
                 );
             } else {
-                return $this->load->view('extension/payfast/payment/payfast', $data);
+                $load_view = $this->load->view('extension/payfast/payment/payfast', $payfast_data);
             }
         }
+
+        return $load_view;
     }
 
     /**
@@ -158,20 +112,14 @@ class Payfast extends Controller
      * @author  Payfast
      *
      */
-    public function callback()
+    public function callback(): void
     {
-        if ($this->config->get('payment_payfast_debug')) {
-            $debug = true;
-        } else {
-            $debug = false;
-        }
+        $debug = $this->initializeDebug();
+
         define('PF_DEBUG', $debug);
-        $pfError = false;
-        $pfErrMsg = '';
-        $pfDone = false;
-        $pfData = array();
-        $pfParamString = '';
-        $orderId = $this->request->post['m_payment_id'] ?? 0;
+        $pf_error   = false;
+        $pf_err_msg = '';
+        $order_id   = $this->request->post['m_payment_id'] ?? 0;
         PayfastCommon::pflog('Payfast ITN call received');
 
         //// Notify Payfast that information has been received
@@ -183,87 +131,141 @@ class Payfast extends Controller
         PayfastCommon::pflog('Get posted data');
 
         // Posted variables from ITN
-        $pfData = PayfastCommon::pfGetData();
-        $pfData[ 'item_name' ] = html_entity_decode($pfData[ 'item_name' ]);
-        $pfData[ 'item_description' ] = html_entity_decode($pfData[ 'item_description' ]);
-        PayfastCommon::pflog('Payfast Data: ' . print_r($pfData, true));
-        if ($pfData === false) {
-            $pfError = true;
-            $pfErrMsg = PayfastCommon::PF_ERR_BAD_ACCESS;
+        $pf_data                     = PayfastCommon::pfGetData();
+        $pf_data['item_name']        = html_entity_decode($pf_data['item_name']);
+        $pf_data['item_description'] = html_entity_decode($pf_data['item_description']);
+        PayfastCommon::pflog('Payfast Data: ' . print_r($pf_data, true));
+        if ($pf_data === false) {
+            $pf_error   = true;
+            $pf_err_msg = PayfastCommon::PF_ERR_BAD_ACCESS;
         }
 
-        //// Verify security signature
-        if (!$pfError && !$pfDone) {
-            PayfastCommon::pflog('Verify security signature');
-            $passphrase = empty($this->config->get('payment_payfast_passphrase')) ? null
-                : $this->config->get('payment_payfast_passphrase');
-            if (!empty($passphrase) || $this->config->get('payment_payfast_sandbox')) {
-                $pfPassphrase = $passphrase;
-            } else {
-                $pfPassphrase = null;
-            }
-
-            // If signature different, log for debugging
-            if (!PayfastCommon::pfValidSignature($pfData, $pfParamString, $pfPassphrase)) {
-                $pfError = true;
-                $pfErrMsg = PayfastCommon::PF_ERR_INVALID_SIGNATURE;
-            }
-        }
+        $pf_verify_data  = $this->verifySignature($pf_error, $pf_data);
+        $pf_error        = $pf_verify_data['pf_error'];
+        $pf_param_string = $pf_verify_data['pf_param_string'];
 
         //// Get internal cart
-        if (!$pfError && !$pfDone) {
+        if (!$pf_error) {
             // Get order data
             $this->load->model(self::CHECKOUT_ORDER_LITERAL);
-            $orderInfo = $this->model_checkout_order->getOrder($orderId);
-            PayfastCommon::pflog("Purchase:\n" . print_r($orderInfo, true));
+            $order_info = $this->model_checkout_order->getOrder($order_id);
+            PayfastCommon::pflog("Purchase:\n" . print_r($order_info, true));
         }
 
         //// Verify data received
-        if (!$pfError) {
+        if (!$pf_error) {
             PayfastCommon::pflog('Verify data received');
-            $pfValid = PayfastCommon::pfValidData($this->pfHost, $pfParamString);
-            if (!$pfValid) {
-                $pfError = true;
-                $pfErrMsg = PayfastCommon::PF_ERR_BAD_ACCESS;
+
+            $pf_valid = PayfastCommon::pfValidData($this->pfHost, $pf_param_string);
+            if (!$pf_valid) {
+                $pf_error   = true;
+                $pf_err_msg = PayfastCommon::PF_ERR_BAD_ACCESS;
             }
         }
 
         //// Check data against internal order
-        if (!$pfError && !$pfDone) {
+        if (!$pf_error) {
             PayfastCommon::pflog('Check data against internal order');
-            if (empty($pfData['token']) || strtotime($pfData['custom_str2']) <=
-                strtotime(gmdate('Y-m-d') . '+ 2 days')) {
-                $amount = filter_var(number_format($orderInfo['total'], 2), FILTER_SANITIZE_NUMBER_INT)/100;
+            if (empty($pf_data['token']) || strtotime($pf_data['custom_str2']) <=
+                                            strtotime(gmdate('Y-m-d') . '+ 2 days')) {
+                $amount = filter_var(number_format($order_info['total'], 2), FILTER_SANITIZE_NUMBER_INT) / 100;
             }
 
-            if (!empty($pfData['token']) && strtotime($pfData['custom_str2'])
-                > strtotime(gmdate('Y-m-d') . '+ 2 days')) {
-                $amount = filter_var(number_format($orderInfo['total'], 2), FILTER_SANITIZE_NUMBER_INT)/100;
+            if (!empty($pf_data['token']) && strtotime($pf_data['custom_str2'])
+                                             > strtotime(gmdate('Y-m-d') . '+ 2 days')) {
+                $amount = filter_var(number_format($order_info['total'], 2), FILTER_SANITIZE_NUMBER_INT) / 100;
             }
 
             // Check order amount
-            if (!PayfastCommon::pfAmountsEqual($pfData[ 'amount_gross' ], $amount)) {
-                $pfError = true;
-                $pfErrMsg = PayfastCommon::PF_ERR_AMOUNT_MISMATCH;
+            if (!PayfastCommon::pfAmountsEqual($pf_data['amount_gross'], $amount)) {
+                $pf_error   = true;
+                $pf_err_msg = PayfastCommon::PF_ERR_AMOUNT_MISMATCH;
             }
         }
 
-        //// Check status and update order
-        if (!$pfError && !$pfDone) {
+        $this->updateOrder($pf_error, $pf_data, $order_id, $pf_err_msg);
+    }
+
+
+    /**
+     * Initialize debug
+     *
+     * @return bool
+     */
+    public function initializeDebug(): bool
+    {
+        if ($this->config->get('payment_payfast_debug')) {
+            $debug = true;
+        } else {
+            $debug = false;
+        }
+
+        return $debug;
+    }
+
+    /**
+     * Verify the signature from Payfast
+     *
+     * @param $pf_error
+     * @param $pf_data
+     *
+     * @return array
+     */
+    public function verifySignature($pf_error, $pf_data): array
+    {
+//// Verify security signature
+        if (!$pf_error) {
+            PayfastCommon::pflog('Verify security signature');
+            $passphrase = empty($this->config->get('payment_payfast_passphrase')) ? null
+                : $this->config->get('payment_payfast_passphrase');
+            if (!empty($passphrase) || $this->config->get('payment_payfast_sandbox')) {
+                $pf_passphrase = $passphrase;
+            } else {
+                $pf_passphrase = null;
+            }
+
+            // If signature different, log for debugging
+            if (!PayfastCommon::pfValidSignature($pf_data, $pf_param_string, $pf_passphrase)) {
+                $pf_error   = true;
+                $pf_err_msg = PayfastCommon::PF_ERR_INVALID_SIGNATURE;
+                PayfastCommon::pflog("Errors:\n" . print_r($pf_err_msg, true));
+            }
+        }
+
+        return [
+            'pf_error'        => $pf_error,
+            'pf_param_string' => $pf_param_string
+        ];
+    }
+
+    /**
+     * Update the order status
+     *
+     * @param $pf_error
+     * @param $pf_data
+     * @param $order_id
+     * @param $pf_err_msg
+     *
+     * @return bool|void
+     */
+    public function updateOrder($pf_error, $pf_data, $order_id, $pf_err_msg)
+    {
+//// Check status and update order
+        if (!$pf_error) {
             PayfastCommon::pflog('Check status and update order');
-            if (empty($pfData['token'])) {
-                switch ($pfData['payment_status']) {
+            if (empty($pf_data['token'])) {
+                switch ($pf_data['payment_status']) {
                     case 'COMPLETE':
                         PayfastCommon::pflog('- Complete');
                         // Update the purchase status
-                        $orderStatusId = $this->config->get('payment_payfast_completed_status_id');
+                        $order_status_id = $this->config->get('payment_payfast_completed_status_id');
 
 
                         break;
                     case 'FAILED':
                         PayfastCommon::pflog('- Failed');
                         // If payment fails, delete the purchase log
-                        $orderStatusId = $this->config->get('payment_payfast_failed_status_id');
+                        $order_status_id = $this->config->get('payment_payfast_failed_status_id');
 
 
                         break;
@@ -279,50 +281,183 @@ class Payfast extends Controller
                         break;
                 }
 
-                $this->model_checkout_order->addHistory($orderId, $orderStatusId, '', true);
+                $this->model_checkout_order->addHistory($order_id, $order_status_id, '', true);
+
                 return true;
             }
 
-            if (isset($pfData['token']) && $pfData['payment_status'] == 'COMPLETE') {
-                $recurring = $this->getOrderRecurringByReference($pfData['m_payment_id']);
-                /** @noinspection PhpUndefinedConstantInspection */
-                $this->db->query("INSERT INTO `" . DB_PREFIX . "order_recurring_transaction`
+            if ($pf_data['payment_status'] == 'COMPLETE') {
+                $recurring = $this->getOrder($pf_data['m_payment_id']);
+                $this->db->query(
+                    'INSERT INTO `' . DB_PREFIX . "order_recurring_transaction`
                                   SET `order_recurring_id` = '" . $recurring['order_recurring_id'] . "',
-                                   `date_added` = NOW(), `amount` = '" . $pfData['amount_gross'] . "', `type` = '1'");
+                                   `date_added` = NOW(), `amount` = '" . $pf_data['amount_gross'] . "', `type` = '1'"
+                );
                 //update recurring order status to active
-                /** @noinspection PhpUndefinedConstantInspection */
-                $this->db->query("UPDATE `" . DB_PREFIX . "order_recurring` SET `status` = 1 WHERE `order_id` = '" .
-                    $pfData['custom_str4'] . "' AND `product_id` = '" . $pfData['custom_str5'] . "'");
-                $orderStatusId = $this->config->get('payment_payfast_completed_status_id');
-                $this->model_checkout_order->addHistory($orderId, $orderStatusId, '', true);
+                $this->db->query(
+                    'UPDATE `' . DB_PREFIX . "order_recurring` SET `status` = 1 WHERE `order_id` = '" .
+                    $pf_data['custom_str4'] . "' AND `product_id` = '" . $pf_data['custom_str5'] . "'"
+                );
+                $order_status_id = $this->config->get('payment_payfast_completed_status_id');
+                $this->model_checkout_order->addHistory($order_id, $order_status_id, '', true);
+
                 return true;
             }
         } else {
-            $this->model_checkout_order->addHistory($orderId, $this->config->get('config_order_status_id'), '', true);
-            PayfastCommon::pflog("Errors:\n" . print_r($pfErrMsg, true));
+            $this->model_checkout_order->addHistory($order_id, $this->config->get('config_order_status_id'), '', true);
+            PayfastCommon::pflog("Errors:\n" . print_r($pf_err_msg, true));
+
             return false;
         }
 
-        if ($pfData['payment_status'] == 'CANCELLED') {
-            $recurring = $this->getOrderRecurringByReference($pfData['m_payment_id']);
+        if ($pf_data['payment_status'] == 'CANCELLED') {
+            $recurring = $this->getOrder($pf_data['m_payment_id']);
 
-            /** @noinspection PhpUndefinedConstantInspection */
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "order_recurring_transaction` SET `order_recurring_id`
-                              = '" . $recurring['order_recurring_id'] . "', `date_added` = NOW(), `type` = '5'");
+            $this->db->query(
+                'INSERT INTO `' . DB_PREFIX . "order_recurring_transaction` SET `order_recurring_id`
+                              = '" . $recurring['order_recurring_id'] . "', `date_added` = NOW(), `type` = '5'"
+            );
 
             //update recurring order status to cancelled
-            /** @noinspection PhpUndefinedConstantInspection */
-            $this->db->query("UPDATE `" . DB_PREFIX . "order_recurring` SET `status` = 3 WHERE `order_recurring_id`
-                              = '" . $recurring['order_recurring_id'] . "' LIMIT 1");
+            $this->db->query(
+                'UPDATE `' . DB_PREFIX . "order_recurring` SET `status` = 3 WHERE `order_recurring_id`
+                              = '" . $recurring['order_recurring_id'] . "' LIMIT 1"
+            );
         }
     }
 
-    public function getOrderRecurringByReference($reference)
+    /**
+     * Get the order recurring reference
+     *
+     * @param $reference
+     *
+     * @return mixed
+     */
+    public function getOrder($reference): mixed
     {
-        /** @noinspection PhpUndefinedConstantInspection */
-        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_recurring` WHERE `reference`
-                                   = '" . $this->db->escape($reference) . "'");
+        $query = $this->db->query(
+            'SELECT * FROM `' . DB_PREFIX . "order_recurring` WHERE `reference`
+                                   = '" . $this->db->escape($reference) . "'"
+        );
 
         return $query->row;
     }
+
+    /**
+     *
+     * Handle recurring products
+     *
+     * @param array $order_info
+     * @param array $payfast_data
+     *
+     * @return array
+     */
+    private function handleRecurringP(array $order_info, array $payfast_data): array
+    {
+        $recurring_data = [];
+
+        foreach ($this->cart->getProducts() as $product) {
+            if ($product['recurring'] ?? false) {
+                $payfast_data['recurring'] = true;
+                if ($product['recurring']['frequency'] == 'month') {
+                    $frequency = 3;
+                }
+
+                if ($product['recurring']['frequency'] == 'year') {
+                    $frequency = 6;
+                }
+
+                $cycles           = $product['recurring']['duration'];
+                $recurring_amount = number_format($product['recurring']['price'], 2, '.', '') / 100;
+                $custom_str3      = $product['recurring']['recurring_id'];
+                $custom_str4      = $this->session->data['order_id'];
+                $custom_str5      = $product['product_id'];
+
+                $recurring_data = [
+                    'recurring_amount' => $recurring_amount,
+                    'custom_str3'      => $custom_str3,
+                    'custom_str4'      => $custom_str4,
+                    'custom_str5'      => $custom_str5,
+                    'cycles'           => $cycles,
+                ];
+                $this->db->query(
+                    'INSERT INTO `' . DB_PREFIX . "order_recurring` SET `order_id` = '" .
+                    $this->session->data['order_id'] . "', `reference` = '" .
+                    $this->session->data['order_id'] . "',
+                                      `product_id` = '" . $product['product_id'] . "',
+                                      `product_name` = '" . $product['name'] . "', `product_quantity` = '" .
+                    $product['quantity'] . "', `recurring_id` = '" .
+                    $product['recurring']['recurring_id'] . "',
+                                      `recurring_name` = '" . $product['recurring']['name'] .
+                    "', `recurring_description` = '" . $product['recurring']['name'] . "',
+                                      `recurring_frequency` = '" . $frequency . "', `recurring_cycle` = '1',
+                                       `recurring_duration` = '" . $cycles . "',
+                                      `recurring_price` = '" . $recurring_amount . "', `status` = '6',
+                                       `date_added` = NOW()"
+                );
+            }
+        }
+
+        return $this->buildPayArray($order_info, $payfast_data, $recurring_data);
+    }
+
+    /**
+     * Build the payment array
+     *
+     * @param array $order_info
+     * @param array $payfast_data
+     * @param array|null $recurring_data
+     *
+     * @return array
+     */
+    private function buildPayArray(array $order_info, array $payfast_data, array $recurring_data = null): array
+    {
+        $merchant_id      = $this->config->get('payment_payfast_merchant_id');
+        $merchant_key     = $this->config->get('payment_payfast_merchant_key');
+        $return_url       = $this->url->link('checkout/success');
+        $cancel_url       = $this->url->link('checkout/checkout', '', 'SSL');
+        $notify_url       = filter_var(
+            $this->url->link('extension/payfast/payment/payfast|callback', '', true),
+            FILTER_SANITIZE_URL
+        );
+        $name_first       = html_entity_decode($order_info['payment_firstname'], ENT_QUOTES, 'UTF-8');
+        $name_last        = html_entity_decode($order_info['payment_lastname'], ENT_QUOTES, 'UTF-8');
+        $email_address    = $order_info['email'];
+        $m_payment_id     = $this->session->data['order_id'];
+        $amount           = filter_var(number_format($order_info['total'], 2), FILTER_SANITIZE_NUMBER_INT) / 100;
+        $item_name        = $this->config->get('config_name') . ' - #' . $this->session->data['order_id'];
+        $item_description = $this->language->get('text_sale_description');
+        $custom_str1      = PF_MODULE_NAME . '_' . PF_SOFTWARE_VER .
+                            '_' . PF_MODULE_VER;
+        $pay_array        = [
+            'merchant_id'      => $merchant_id,
+            'merchant_key'     => $merchant_key,
+            'return_url'       => $return_url,
+            'cancel_url'       => $cancel_url,
+            'notify_url'       => $notify_url,
+            'name_first'       => $name_first,
+            'name_last'        => $name_last,
+            'email_address'    => $email_address,
+            'm_payment_id'     => $m_payment_id,
+            'amount'           => $amount,
+            'item_name'        => html_entity_decode($item_name),
+            'item_description' => html_entity_decode($item_description),
+            'custom_str1'      => $custom_str1
+        ];
+
+        if ($payfast_data['recurring']) {
+            $pay_array['custom_str2']       = date('Y-m-d');
+            $pay_array['custom_str3']       = $recurring_data['custom_str3'] ?? '';
+            $pay_array['custom_str4']       = $recurring_data['custom_str4'] ?? '';
+            $pay_array['custom_str5']       = $recurring_data['custom_str5'] ?? '';
+            $pay_array['subscription_type'] = '1';
+            $pay_array['billing_date']      = date('Y-m-d');
+            $pay_array['recurring_amount']  = $recurring_data['recurring_amount'] ?? '';
+            $pay_array['frequency']         = $recurring_data['frequency'] ?? '';
+            $pay_array['cycles']            = $recurring_data['cycles'] ?? '';
+        }
+
+        return $pay_array;
+    }
+
 }
