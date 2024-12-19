@@ -7,8 +7,7 @@ to [contact the Payfast support team](https://payfast.io/contact/) should you re
 
 ## Installation
 
-1. Compress the contents of the **payfast** folder into a single zip. When doing so, make sure to highlight the contents
-   of the folder and not the folder itself. Rename the zip to **payfast.ocmod.zip**.
+1. Download **[payfast.ocmod.zip](https://github.com/Payfast/mod-opencart/releases/download/v1.2.0/payfast.ocmod.zip)**.
 2. Login to the admin section of your OpenCart installation.
 3. Navigate to the Installer under Extensions.
 4. Upload the Compressed Payfast Folder (payfast.ocmod.zip).
